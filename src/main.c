@@ -162,7 +162,7 @@ extern char * rev;
 
 /**
  * \brief The main() function
- * 
+ *
  * \details The main() function of sc-im. It is the first function called when
  * the applicaiton is executed.
  *
@@ -236,7 +236,7 @@ int main (int argc, char ** argv) {
             start_default_ucolors();
         /*
          * in case we decide to change colors
-         * this creates a dictionary and stores in it
+         * this creates a dictionary and stores it in
          * the relationship between macros and the keys values
          * that are defined in .sc files
          */
@@ -351,7 +351,7 @@ extern graphADT graph;
 
 /**
  * \brief Creates the structures used by the program.
- * 
+ *
  * \return none
  */
 
@@ -512,7 +512,7 @@ int exit_app(int status) {
 }
 
 /**
- * \brief Read command line parameters and store them in a dictionary 
+ * \brief Read command line parameters and store them in a dictionary
  *
  * \details Read parameters passed to SC-IM executable and
  * store them in user_conf dictionary.
