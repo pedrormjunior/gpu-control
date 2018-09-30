@@ -323,7 +323,7 @@ int writefile(char * fname, int r0, int c0, int rn, int cn, int verbose) {
  * \param[in] c0
  * \param[in] rn
  * \param[in] cn
- * 
+ *
  * \return none
  */
 
@@ -498,7 +498,7 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
  * \brief TODO Document write_franges()
  *
  * \param[in] f file pointer
- * 
+ *
  * \return none
  */
 
@@ -535,7 +535,7 @@ void write_marks(register FILE *f) {
         m = get_mark((char) i);
 
         // m->rng should never be NULL if both m->col and m->row are -1 !!
-        if ( m->row == -1 && m->col == -1) { // && m->rng != NULL ) {  
+        if ( m->row == -1 && m->col == -1) { // && m->rng != NULL ) {
             fprintf(f, "mark %c %s%d ", i, coltoa(m->rng->tlcol), m->rng->tlrow);
             fprintf(f, "%s%d\n", coltoa(m->rng->brcol), m->rng->brrow);
         } else if ( m->row != 0 && m->row != 0) { // && m->rng == NULL) {
@@ -1136,7 +1136,7 @@ void do_export(int r0, int c0, int rn, int cn) {
  * \param[in] c0
  * \param[in] rn
  * \param[in] cn
- * 
+ *
  * \return none
  */
 
@@ -1322,7 +1322,7 @@ void unspecial(FILE * f, char * str, int delim) {
 /**
  * \brief Check the mas length of lines in a file
  *
- * \details Check masimum length of lines in a file. Note: 
+ * \details Check masimum length of lines in a file. Note:
  * FILE * f shall be opened.
  *
  * \param[in] f file pointer
