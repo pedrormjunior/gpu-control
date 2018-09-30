@@ -331,7 +331,7 @@ void int_deletecol(int col, int mult) {
  * with the "pt" command. r1, c1, r2, and c2 define the range in which the
  * dr and dc values should be used. Special =='u' means special copy from
  * spreadsheet to undo struct. Since its mandatory to make isolated copies
- * of p->expr->e.o.right.e.v.vp and p->expr->e.o.right.e.v.vp 
+ * of p->expr->e.o.right.e.v.vp and p->expr->e.o.right.e.v.vp
  *
  * \param[in] n
  * \param[in] p
@@ -655,7 +655,7 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
 }
 
 /**
- * \brief TODO Write brief function description 
+ * \brief TODO Write brief function description
  *
  * \details Note: Modified 9/17/90 THA to handle more formats.
  *
@@ -963,7 +963,7 @@ void int_deleterow(int row, int mult) {
  * \param[in] sc
  * \param[in] er
  * \param[in] ec
- * 
+ *
  * \return none
  */
 
@@ -996,7 +996,7 @@ void ljustify(int sr, int sc, int er, int ec) {
 
 /**
  * \brief TODO Document rjustify()
- * 
+ *
  * \param[in] sr
  * \param[in] sc
  * \param[in] er
@@ -2010,7 +2010,7 @@ void valueize_area(int sr, int sc, int er, int ec) {
  * \param[in] vir_tlcol
  * \param[in] vir_brrow
  * \param[in] vir_brcol
- * 
+ *
  * \return none
  */
 
@@ -2686,7 +2686,7 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == L'd' && bs == 2 &&    // cuts a cell
                  buf->pnext->value == L'd') res = EDITION_CMD;
 
-        else if (buf->value == L'\'' && bs == 2 &&   // tick 
+        else if (buf->value == L'\'' && bs == 2 &&   // tick
                ((buf->pnext->value - (L'a' - 1)) < 1 ||
                  buf->pnext->value > 26)) res = MOVEMENT_CMD;
 
