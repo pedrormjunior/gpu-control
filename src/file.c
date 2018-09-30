@@ -728,6 +728,24 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
     // open fname for reading
     register FILE * f;
     char save[PATHLEN];
+    char * fname_gpu = "/home/pedrormjunior/.gpu-control/gpu-info.sc";
+    (void) strcpy(save, fname_gpu);
+    f = fopen(save, "r");
+    if (f == NULL) {
+        loading = 0;
+        return SC_READFILE_DOESNTEXIST;
+    } /* */
+
+    if (eraseflg) erasedb();
+
+    while (! brokenpipe && fgets(line, sizeof(line), f)) {
+        linelim = 0;
+        if (line[0] != '#') (void) yyparse();
+    }
+    fclose(f);
+
+    // We open an 'sc' format file
+    // open fname for reading
     if (*fname == '\0') fname = curfile;
     (void) strcpy(save, fname);
     f = fopen(save, "r");
@@ -736,8 +754,6 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         strcpy(curfile, save);
         return SC_READFILE_DOESNTEXIST;
     } /* */
-
-    if (eraseflg) erasedb();
 
     while (! brokenpipe && fgets(line, sizeof(line), f)) {
         linelim = 0;

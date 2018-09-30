@@ -291,17 +291,10 @@ int main (int argc, char ** argv) {
     // initiate ui
     FILE * f;
     if ( ! atoi((char *) get_conf_value("nocurses"))) {
-        // we show welcome screen if no spreadsheet was passed to SC-IM
-        // and no input was sent throw pipeline
-        if ( ! curfile[0] && ! wcslen(stdin_buffer)) {
-            ui_do_welcome();
-            // show mode and cell's details in status bar
-            ui_print_mode();
-            ui_show_celldetails();
-        } else {
-            ui_show_header();
-            ui_update(TRUE);
-        }
+	// For `gpu-control', never shows the welcome screen, as the
+	// data are always loaded.
+	ui_show_header();
+	ui_update(TRUE);
     } else {
         f = fopen("/dev/tty", "rw");
         if (f == NULL) sc_error("fatal error loading stdin");
