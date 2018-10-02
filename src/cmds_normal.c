@@ -58,10 +58,22 @@
 #include "interp.h"
 #include "freeze.h"
 #include "utils/extra.h"
+#include "unistd.h"
+#include "pwd.h"
 #ifdef UNDO
 #include "undo.h"
 #endif
 
+// https://stackoverflow.com/a/8953445
+const char *getUserName() {
+    uid_t uid = geteuid();
+    struct passwd *pw = getpwuid(uid);
+    if (pw) {
+        return pw->pw_name;
+    }
+
+    return "";
+}
 
 #include "dep_graph.h"
 extern graphADT graph;
@@ -476,6 +488,26 @@ void do_normalmode(struct block * buf) {
             inputline_pos = 0;
             real_inputline_pos = 0;
             ui_show_header();
+            break;
+
+        // INSERT COMMAND
+        case L' ':
+            if (locked_cell(currow, curcol)) return;
+
+            // Get the username with quotes.
+            const char * pw_name = getUserName();
+            char username[BUFFERSIZE];
+            sprintf(username, "\"%s\"", pw_name);
+
+            // Convert username to wide char for insertion.
+            wchar_t content[BUFFERSIZE];
+            mbstowcs(content, username, strlen(username));
+
+            // Insert the username on the current cell and update.
+            char ope[BUFFERSIZE] = "label";
+            enter_cell_content(currow, curcol, ope, content);
+            ui_clr_header(0);
+            ui_update(TRUE);
             break;
 
         // EDITION COMMANDS

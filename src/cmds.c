@@ -2552,6 +2552,7 @@ int is_single_command (struct block * buf, long timeout) {
         // commands for changing mode
         if (buf->value == L':')             res = MOVEMENT_CMD;
         else if (buf->value == L'\\')       res = MOVEMENT_CMD;
+        else if (buf->value == L' ')        res = MOVEMENT_CMD;
         else if (buf->value == L'<')        res = MOVEMENT_CMD;
         else if (buf->value == L'>')        res = MOVEMENT_CMD;
         else if (buf->value == L'=')        res = MOVEMENT_CMD;
