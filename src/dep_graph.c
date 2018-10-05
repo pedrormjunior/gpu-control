@@ -122,6 +122,7 @@ vertexT * GraphAddVertex(graphADT graph , struct ent * ent) {
     //sc_debug("will add vertex %d %d ", ent->row, ent->col);
     vertexT * newVertex = (vertexT *) malloc(sizeof(vertexT));
     newVertex->visited = 0;
+    newVertex->eval_visited = 0;
     newVertex->ent = ent;
     newVertex->edges = NULL;
     newVertex->back_edges = NULL;
@@ -216,9 +217,9 @@ void GraphAddEdge(vertexT * from, vertexT * to) {
       return;
    }
    // do we have to check this here? or shall we handle it outside from the caller?
-   markAllVerticesNotVisited(); // needed to check if edge already exists
+   markAllVerticesNotVisited(0); // needed to check if edge already exists
    if (GraphIsReachable(from, to, 0)) {
-      sc_info("Error while adding edge: the edge already exists!") ;
+      //sc_info("Error while adding edge: the edge already exists! - %d %d - %d %d", from->ent->row, from->ent->col, to->ent->row, to->ent->col) ;
       return;
    }
 
@@ -243,14 +244,16 @@ void GraphAddEdge(vertexT * from, vertexT * to) {
  * \brief Iterate through all verticies and set visited to false
  *
  * Iterate through all verticies and set visited to false
+ * evalvisited
  *
  * \return none
  */
 
-void markAllVerticesNotVisited () {
+void markAllVerticesNotVisited (int eval_visited) {
    vertexT * temp = graph->vertices;
    while (temp != NULL) {
-      temp->visited = 0;
+      if (eval_visited) temp->eval_visited = 0;
+      else temp->visited = 0;
       temp = temp->next;
    }
    return;
@@ -279,7 +282,7 @@ void print_vertexs() {
    strcpy(msg, "Content of graph:\n");
 
    while (temp != NULL) {
-      sprintf(det + strlen(det), "vertex: %d %d v:%d\n", temp->ent->row, temp->ent->col, temp->visited);
+      sprintf(det + strlen(det), "vertex: %d %d vis:%d eval_vis:%d\n", temp->ent->row, temp->ent->col, temp->visited, temp->eval_visited);
       etemp = temp->edges;
 
       /* check not overflow msg size. if so, just realloc. */
@@ -361,21 +364,25 @@ void destroy_vertex(struct ent * ent) {
        v_prev->next = v_cur->next;
    }
 
+   /*FIXME
    // for each edge in back_edges, we look for the reference to the vertex we are deleting, and we erase it!
    edgeT * e2 = v_cur->back_edges;
    while (e2 != NULL) {
     //   sc_debug("back_edge: we follow %d %d", e2->connectsTo->ent->row, e2->connectsTo->ent->col);
        delete_reference(v_cur, e2->connectsTo, 0);
        e2 = e2->next;
-   }
+   }*/
 
    // for each edge in edges, we look for the reference to the vertex we are deleting, and we erase it!
    edgeT * e = v_cur->edges;
-   while (e != NULL) {
-    //   sc_debug("edge: we follow %d %d", e->connectsTo->ent->row, e->connectsTo->ent->col);
+   if (v_cur->back_edges == NULL)
+   while (e != NULL && v_cur->back_edges == NULL) {
+    // sc_debug("edge: we follow %d %d", e->connectsTo->ent->row, e->connectsTo->ent->col);
        delete_reference(v_cur, e->connectsTo, 1);
 
-       if (e->connectsTo->edges == NULL && e->connectsTo->back_edges == NULL && !e->connectsTo->ent->expr) destroy_vertex(e->connectsTo->ent);
+       // delete vertex only if it end up having no edges, no expression, no value, no label....
+       if (e->connectsTo->edges == NULL && e->connectsTo->back_edges == NULL && !e->connectsTo->ent->expr && !(e->connectsTo->ent->flags & is_valid) && ! e->connectsTo->ent->label)
+           destroy_vertex(e->connectsTo->ent);
 //     WARNING: an orphan vertex now represents an ent that has an enode thats
 //     need to be evaluated, but do not depend in another cell.
        e = e->next;
@@ -517,14 +524,15 @@ void rebuild_graph() {
 
 /**
  * \brief Document All_vertexs_of_edges_visited
- * \details Used in EvalBottomUp
+ * \details Used in EvalBottomUp and GraphIsReachable
  * \return int
  */
-int All_vertexs_of_edges_visited(struct edgeTag * e) {
+int All_vertexs_of_edges_visited(struct edgeTag * e, int eval_visited) {
     struct edgeTag * edges = e;
     while (edges != NULL) {
         //sc_debug("1 r:%d c:%d visited:%d", edges->connectsTo->ent->row, edges->connectsTo->ent->col, edges->connectsTo->visited);
-        if (! edges->connectsTo->visited) return 0;
+        if (eval_visited && ! edges->connectsTo->eval_visited) return 0;
+        else if (!eval_visited && ! edges->connectsTo->visited) return 0;
         edges = edges->next;
     }
     return 1;
@@ -540,19 +548,19 @@ void EvalBottomUp() {
     vertexT * temp = graph->vertices;
     struct ent * p;
 
-    markAllVerticesNotVisited();
+    markAllVerticesNotVisited(1);
     int evalDone = 0;
 
     while (temp != NULL) {
         //sc_debug("analizo %d %d", temp->ent->row, temp->ent->col);
-        if ( !temp->visited && (temp->edges == NULL || All_vertexs_of_edges_visited(temp->edges))) {
+        if ( !temp->eval_visited && (temp->edges == NULL || All_vertexs_of_edges_visited(temp->edges, 1))) {
             //sc_debug("visito %d %d", temp->ent->row, temp->ent->col);
 
             if ((p = *ATBL(tbl, temp->ent->row, temp->ent->col)) && p->expr) {
                 EvalJustOneVertex(temp->ent, temp->ent->row, temp->ent->col, 0);
                 evalDone = 1;
             }
-            temp->visited = 1;
+            temp->eval_visited = 1;
         }
         temp = temp->next;
         if (temp == NULL) {
@@ -756,7 +764,7 @@ void ents_that_depends_on_range (int r1, int c1, int r2, int c2) {
 
         for (r = r1; r <= r2; r++) {
             for (c = c1; c <= c2; c++) {
-                markAllVerticesNotVisited();
+                markAllVerticesNotVisited(0);
                 p = *ATBL(tbl, r, c);
                 if (p == NULL) continue;
                 ents_that_depends_on(p);
